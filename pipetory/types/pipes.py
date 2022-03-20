@@ -1,9 +1,9 @@
-from enum import Enum
+from enum import Enum, auto
 
 class PipeTypes(Enum):
     """
     Enum for the different types of pipes.
     """
-    SEQUENTIAL = 1
-    MERGER = 2
-    SPLITTER = 3
+    SEQUENTIAL = auto()
+    MERGER = auto()
+    SPLITTER = auto()
