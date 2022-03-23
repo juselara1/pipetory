@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "pipetory"
 version = "0.1.0"
-description = "Package to easily build and compose data pipelines with several backends"
+description = "Package to easily build and compose pipelines with several backends"
 authors = ["Juan Lara <julara@unal.edu.co>"]
 license = "MIT"
 

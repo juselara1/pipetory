@@ -1,6 +1,7 @@
 import pandas as pd
 import datetime as dt
 from pipetory import factory
+import logging
 
 # %%
 # Create a dataframe with 4 columns: name, birth date, and height
@@ -40,22 +41,16 @@ def transform_names(df):
     return tdf
 
 # %%
-preprocess_pipe = (
-        factory("sequential", "df1")
-        .register(assign_types, "types")
-        .register(transform_dates, "dates")
-        .register(transform_names, "names")
-        .compile()
-        )
+if __name__ == "__main__":
+    logging.basicConfig()
+    log = logging.getLogger()
+    log.setLevel(logging.INFO)
+    preprocess_pipe = (
+            factory("sequential", "df1", log)
+            .register(assign_types, "types")
+            .register(transform_dates, "dates")
+            .register(transform_names, "names")
+            .compile()
+            )
 
-# %%
-preprocess_pipe(df)
-
-# %%
-preprocess_pipe(df, step="types")
-
-# %%
-preprocess_pipe(df, step="dates")
-
-# %%
-preprocess_pipe(df, step="names")
+    print(preprocess_pipe(df))

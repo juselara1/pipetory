@@ -1,19 +1,24 @@
 from abc import ABC, abstractmethod
-from pipetory.types.dataset import OptMultiPDataFrame, Func, Kwargs, Step
-from typing import Union, Dict, List
+from pipetory.types.functions import Kwargs, Step
+from pipetory.types.data import DataArray, MultiArray, DataSet
+from typing import Union, Dict, List, Callable
 from functools import reduce, partial
 
-def compose(f1: Func, f2: Func) -> Func:
-    return lambda data: f1(f2(data))
+GFunc = Callable[[DataSet], DataSet]
 
 class AbstractPipe(ABC):
+    steps: List[str]
 
     @abstractmethod
-    def call(self, data: OptMultiPDataFrame, step: Step = None) -> OptMultiPDataFrame:
+    def call(self, data: DataSet, step: Step = None) -> DataSet:
         ...
 
     @abstractmethod
-    def register(self, func: Union[Func, "AbstractPipe"], step: Step, **kwargs: Kwargs) -> "AbstractPipe":
+    def register(self, func: Union[GFunc, "AbstractPipe"], step: Step, **kwargs: Kwargs) -> "AbstractPipe":
+        ...
+
+    @abstractmethod
+    def observe(self, step: str, kwargs: Kwargs) -> GFunc:
         ...
 
     @abstractmethod
@@ -24,45 +29,67 @@ class AbstractPipe(ABC):
     def repr(self) -> str:
         ...
 
-class Pipe(AbstractPipe):
-    def __init__(self, name: str):
-        self.steps: List[str] = []
-        self.funcs: Dict[str, Func] = {}
-        self.cfuncs: Dict[str, Func] = {}
-        self.name: str = name
+    @abstractmethod
+    def log_step(
+            self,
+            func: Union[GFunc, "AbstractPipe"],
+            step: str
+            ) -> Union[GFunc, "AbstractPipe"]:
+        ...
 
-    def __call__(self, data: OptMultiPDataFrame, step: Step = None) -> OptMultiPDataFrame:
-        return self.call(data, step)
+    @property
+    def n_steps(self) -> int:
+        return len(self.steps)
 
     def __repr__(self) -> str:
         return self.repr()
-    
+
     def __str__(self) -> str:
         return self.repr()
 
-    def compile(self) -> "Pipe":
-        self.cfuncs = {}
-        funcs = []
-        for step in self.steps:
-            func = self.funcs[step]
-            if isinstance(func, Pipe):
-                func = func.compile()
-            funcs.append(self.funcs[step])
-            self.cfuncs[step] = reduce(compose, funcs)
-        return self
+    def __call__(self, data: DataSet, step: Step = None) -> DataSet:
+        return self.call(data, step)
 
-    def call(self, data: OptMultiPDataFrame, step: Step = None) -> OptMultiPDataFrame:
-        valid_step = self.steps[-1] if step is None else step
-        if valid_step not in self.steps:
-            raise ValueError(f"Step {valid_step} not found in pipe: {self.name}")
-        return self.cfuncs[valid_step](data)
+class Lockable:
+    locked: Dict[str, bool]
 
-    def register(self, func: Func, step: str, **kwargs: Kwargs) -> "Pipe":
-        if kwargs is not None:
-            func = partial(func, **kwargs)
-        if step in self.funcs:
-            print("[WARNING] Overwriting step {}".format(step))
-        else:
-            self.steps.append(step)
-        self.funcs[step] = func
-        return self
+    def is_locked(self, step: str) -> bool:
+        return self.locked[step]
+
+    def lock(self, step: str):
+        self.locked[step] = True
+
+    def unlock(self, step: str):
+        self.locked[step] = False
+
+    def lock_all(self):
+        for step in self.locked:
+            self.lock(step)
+
+    def unlock_all(self):
+        for step in self.locked:
+            self.unlock(step)
+
+class AbstractSequencer(AbstractPipe, Lockable):
+    
+    @abstractmethod
+    def call(self, data: DataArray, step: Step = None) -> DataArray:
+        ...
+
+class AbstractParalleler(AbstractPipe, Lockable):
+
+    @abstractmethod
+    def call(self, data: MultiArray, step: Step = None) -> MultiArray:
+        ...
+
+class AbstractMerger(AbstractPipe, Lockable):
+    
+    @abstractmethod
+    def call(self, data: MultiArray, step: Step = None) -> DataArray:
+        ...
+
+class AbstractSplitter(AbstractPipe, Lockable):
+    
+    @abstractmethod
+    def call(self, data: DataArray, step: Step = None) -> MultiArray:
+        ...
