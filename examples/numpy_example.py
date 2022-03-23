@@ -32,3 +32,21 @@ res = pipe(X)
 # %%
 print(res)
 
+
+# %%
+pipe.lock("square")
+
+# %%
+pipe.compile()
+
+# %%
+pipe(X)
+
+# %%
+pipe.unlock_all()
+
+# %%
+pipe.compile()
+
+# %%
+pipe(X, step="square")

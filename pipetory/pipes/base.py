@@ -5,7 +5,27 @@ from typing import Union, Dict, List, Callable
 
 GFunc = Callable[[DataSet], DataSet]
 
-class AbstractPipe(ABC):
+class Lockable:
+    locked: Dict[str, bool]
+
+    def is_locked(self, step: str) -> bool:
+        return self.locked[step]
+
+    def lock(self, step: str):
+        self.locked[step] = True
+
+    def unlock(self, step: str):
+        self.locked[step] = False
+
+    def lock_all(self):
+        for step in self.locked:
+            self.lock(step)
+
+    def unlock_all(self):
+        for step in self.locked:
+            self.unlock(step)
+
+class AbstractPipe(ABC, Lockable):
     steps: List[str]
 
     @abstractmethod
@@ -17,7 +37,10 @@ class AbstractPipe(ABC):
         ...
 
     @abstractmethod
-    def observe(self, step: str, **kwargs: Kwargs) -> GFunc:
+    def observe(
+            self, step: str,
+            **kwargs: Kwargs
+            ) -> Callable[[Callable], GFunc]:
         ...
 
     @abstractmethod
@@ -49,45 +72,25 @@ class AbstractPipe(ABC):
     def __call__(self, data: DataSet, step: Step = None) -> DataSet:
         return self.call(data, step)
 
-class Lockable:
-    locked: Dict[str, bool]
-
-    def is_locked(self, step: str) -> bool:
-        return self.locked[step]
-
-    def lock(self, step: str):
-        self.locked[step] = True
-
-    def unlock(self, step: str):
-        self.locked[step] = False
-
-    def lock_all(self):
-        for step in self.locked:
-            self.lock(step)
-
-    def unlock_all(self):
-        for step in self.locked:
-            self.unlock(step)
-
-class AbstractSequencer(AbstractPipe, Lockable):
+class AbstractSequencer(AbstractPipe):
     
     @abstractmethod
     def call(self, data: DataArray, step: Step = None) -> DataArray:
         ...
 
-class AbstractParalleler(AbstractPipe, Lockable):
+class AbstractParalleler(AbstractPipe):
 
     @abstractmethod
     def call(self, data: MultiArray, step: Step = None) -> MultiArray:
         ...
 
-class AbstractMerger(AbstractPipe, Lockable):
+class AbstractMerger(AbstractPipe):
     
     @abstractmethod
     def call(self, data: MultiArray, step: Step = None) -> DataArray:
         ...
 
-class AbstractSplitter(AbstractPipe, Lockable):
+class AbstractSplitter(AbstractPipe):
     
     @abstractmethod
     def call(self, data: DataArray, step: Step = None) -> MultiArray:

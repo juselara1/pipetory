@@ -85,7 +85,10 @@ class SequencePipe(AbstractSequencer):
         self.locked[step] = False
         return self
 
-    def observe(self, step: str, **kwargs: Kwargs):
+    def observe(
+            self, step: str,
+            **kwargs: Kwargs
+            ) -> Callable[[Callable], SFunc]:
         """
         Creates a decorator that tracks a step.
 
