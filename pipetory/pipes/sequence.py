@@ -144,7 +144,7 @@ class SequencePipe(AbstractSequencer):
                 continue
             logged_func = self.log_step(self.funcs[step], step)
             funcs.append(logged_func)
-            self.cfuncs[step] = reduce(compose, funcs)
+            self.cfuncs[step] = reduce(compose, funcs[::-1])
         return self
 
     def repr(self) -> str:

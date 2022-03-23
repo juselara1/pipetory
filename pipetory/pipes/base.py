@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from pipetory.types.functions import Kwargs, Step
 from pipetory.types.data import DataArray, MultiArray, DataSet
 from typing import Union, Dict, List, Callable
-from functools import reduce, partial
 
 GFunc = Callable[[DataSet], DataSet]
 
@@ -18,7 +17,7 @@ class AbstractPipe(ABC):
         ...
 
     @abstractmethod
-    def observe(self, step: str, kwargs: Kwargs) -> GFunc:
+    def observe(self, step: str, **kwargs: Kwargs) -> GFunc:
         ...
 
     @abstractmethod
