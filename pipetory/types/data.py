@@ -1,3 +1,8 @@
+"""
+The :mod:`pipetory.types.data` module contains the types associated with
+data.
+"""
+
 from typing import Protocol, Union, Sequence, Any, Optional, List
 
 class DataArray(Protocol):

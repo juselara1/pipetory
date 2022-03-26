@@ -1,3 +1,7 @@
+"""
+The :mod:`pipetory.pipes.base` module contains the abstract classes for
+the different types of pipes.
+"""
 from abc import ABC, abstractmethod
 from pipetory.types.functions import Args, Kwargs, Step
 from pipetory.types.data import DataArray, MultiArray, DataSet

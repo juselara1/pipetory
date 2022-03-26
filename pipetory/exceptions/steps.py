@@ -1,3 +1,8 @@
+"""
+The :mod:`pipetory.exceptions.steps` module contains the exceptions that may
+be raised on the pipe's steps.
+"""
+
 from pipetory.types.exceptions import StepErrorKind
 
 step_err_msg = {
@@ -24,8 +29,22 @@ class StepError(Exception):
         self.pipeline = pipeline
         super().__init__(self.resolve())
 
-    def resolve(self):
+    def resolve(self) -> str:
+        """
+        Creates the error message.
+
+        Returns
+        -------
+        str
+            The error message.
+        """
         return step_err_msg[self.kind].format(self.step, self.pipeline)
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """
+        Returns
+        -------
+        str
+            The error message.
+        """
         return self.resolve()

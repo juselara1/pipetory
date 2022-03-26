@@ -1,3 +1,8 @@
+"""
+The :mod:`pipetory.factory` module provides the :func:`factory` function,
+for object creation.
+"""
+
 from pipetory.types.pipes import PipeTypes
 from pipetory.pipes.base import AbstractPipe
 from pipetory.pipes.sequence import SequencePipe

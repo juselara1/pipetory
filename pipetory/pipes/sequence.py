@@ -1,3 +1,7 @@
+"""
+The :mod:`pipetory.pipes.sequence` module contains the :class:`Sequence` pipe
+for function composition, logging and measurement.
+"""
 from pipetory.pipes.base import AbstractSequencer
 from pipetory.types.data import DataArray
 from pipetory.types.functions import Step, Kwargs

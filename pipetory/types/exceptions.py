@@ -1,3 +1,7 @@
+"""
+The :mod:`pipetory.types.exceptions` module contains the types associated with
+exceptions.
+"""
 from enum import Enum, auto
 
 class StepErrorKind(Enum):

@@ -1,3 +1,8 @@
+"""
+The :mod:`pipetory.types.pipes` module contains the types associated with
+pipelines.
+"""
+
 from enum import Enum, auto
 
 class PipeTypes(Enum):
